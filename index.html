@@ -208,6 +208,26 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .chip:hover{border-color:var(--fuchsia-dim); color:var(--fuchsia)}
 #mentorOut{margin-top:16px; background:var(--deep); border:1px solid var(--line); border-radius:var(--rs); padding:16px 18px; font-size:.88rem; color:var(--mist); line-height:1.7; white-space:pre-wrap; display:none}
 
+/* ---------- spoke guide ---------- */
+details.guide{margin-top:12px; border:1px dashed var(--line); border-radius:var(--rs); background:var(--deep)}
+details.guide summary{
+  cursor:pointer; list-style:none; padding:11px 15px; display:flex; align-items:center; gap:9px;
+  font-family:'DM Mono',monospace; font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold);
+}
+details.guide summary::-webkit-details-marker{display:none}
+details.guide summary::before{content:"☸"; color:var(--gold)}
+details.guide summary::after{content:"+"; margin-left:auto; color:var(--faint); font-size:.9rem}
+details.guide[open] summary::after{content:"−"}
+.guide-body{padding:4px 16px 16px; font-size:.82rem; color:var(--mist); line-height:1.6}
+.guide-body p{margin-bottom:10px}
+.guide-body p b{color:var(--ink); font-weight:500}
+.spokes{display:grid; gap:7px; margin:10px 0}
+.spokes .sp{display:grid; grid-template-columns:74px 1fr; gap:10px; align-items:baseline;
+  background:var(--panel); border:1px solid var(--line); border-radius:7px; padding:8px 11px}
+.spokes .sp .sk{font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.1em; color:var(--gold)}
+.spokes .sp .sd{font-size:.78rem; color:var(--mist)}
+.spokes .sp .sd b{color:var(--ink); font-weight:500}
+
 /* ---------- footer ---------- */
 footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; text-align:center}
 .sig{font-family:'Cinzel',serif; font-size:.82rem; letter-spacing:.18em; color:var(--mist)}
@@ -264,7 +284,7 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
     </div>
     <div class="wheelwrap">
       <canvas id="heroWheel" width="680" height="680" role="img" aria-label="Dharma wheel of fairness — six spokes, one polygon per group; bias warps the wheel"></canvas>
-      <div class="wheel-cap">The Dharma Wheel of Fairness — live, from your model</div>
+      <button class="wheel-cap" id="wheelCapBtn" style="background:none;border:none;cursor:pointer;text-decoration:underline dotted;color:var(--faint)">The Dharma Wheel of Fairness — what do the spokes mean?</button>
     </div>
   </div>
 
@@ -374,6 +394,21 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
           <canvas id="judgeWheel" width="640" height="640"></canvas>
           <div class="cap">Six spokes · cyan = Group A · fuchsia = Group B · a fair model draws one wheel, not two</div>
         </div>
+        <details class="guide" id="wheelGuide">
+          <summary>What is this wheel? What do the spokes mean?</summary>
+          <div class="guide-body">
+            <p>The <b>Dharma Wheel of Fairness</b> is a radar chart: each spoke is one performance metric of your trained model, drawn separately per group — <b style="color:var(--cyan)">cyan for Group A</b>, <b style="color:var(--fuchsia)">fuchsia for Group B</b>. Same model, same rules; the only difference is who is being judged. Outward is always better.</p>
+            <div class="spokes">
+              <div class="sp"><span class="sk">SELECT</span><span class="sd"><b>Selection rate</b> — what fraction of the group receives the positive outcome (released, approved, shortlisted).</span></div>
+              <div class="sp"><span class="sk">TPR</span><span class="sd"><b>True Positive Rate</b> — of the genuinely qualified, how many the model correctly approves. Also called recall, or <b>equal opportunity</b>.</span></div>
+              <div class="sp"><span class="sk">1−FPR</span><span class="sd"><b>Inverse False Positive Rate</b> — how well the model avoids wrongly approving the unqualified (inverted so outward = better).</span></div>
+              <div class="sp"><span class="sk">PREC</span><span class="sd"><b>Precision</b> — of everyone approved, how many actually deserved it.</span></div>
+              <div class="sp"><span class="sk">NPV</span><span class="sd"><b>Negative Predictive Value</b> — of everyone rejected, how many actually deserved rejection.</span></div>
+              <div class="sp"><span class="sk">ACC</span><span class="sd"><b>Accuracy</b> — overall fraction of correct verdicts for that group.</span></div>
+            </div>
+            <p><b>Why it matters:</b> a perfectly fair model draws one wheel, not two — the polygons would overlap exactly. Every gap between the shapes is a specific, named kind of unfairness. And the spokes fight each other: equalise TPR with group thresholds and precision drifts apart. That is Chamber V's impossibility theorem made visible. The wheel only turns true when every spoke is equal — and this sandbox lets you feel why that is so hard.</p>
+          </div>
+        </details>
         <div class="mgrid" id="fairStats"></div>
       </div>
     </div>
@@ -935,6 +970,8 @@ $("kThresh").oninput=()=>{ syncKnobs();
   renderJudge(); renderArena(); };
 ["kGap","kIThresh"].forEach(id=>$(id).oninput=()=>{ syncKnobs(); drawImposs(); });
 $("kPriv").oninput=privRender;
+$("wheelCapBtn").onclick=()=>{ const g=$("wheelGuide"); g.open=true;
+  g.scrollIntoView({behavior:"smooth", block:"center"}); };
 document.querySelectorAll(".mit").forEach(b=>b.onclick=()=>{
   const k=b.dataset.mit; if(k==="none")return;
   b.classList.toggle("active");
