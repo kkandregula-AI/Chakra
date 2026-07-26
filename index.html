@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#08060f">
+<meta name="description" content="CHAKRA — AI Bias & Ethics Sandbox. Feel how biased data warps model judgment, then fight back with real mitigation strategies. Episode 12 of the AI Education Series.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CHAKRA">
+<title>CHAKRA — AI Bias & Ethics Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#08060f; --deep:#0d0a18; --panel:#12101e; --panel2:#181529; --line:#2a2440;
+  --fuchsia:#e879f9; --fuchsia-dim:#a21caf; --cyan:#22d3ee; --cyan-dim:#0e7490;
+  --gold:#f5c542; --gold-dim:#a16207;
+  --ink:#eceaf6; --mist:#b8b4cc; --faint:#7d7896;
+  --ok:#34d399; --bad:#f87171; --warn:#fbbf24;
+  --r:14px; --rs:9px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--void); color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif; font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(232,121,249,.09), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 100%, rgba(34,211,238,.06), transparent 60%);
+}
+main{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 20px 80px}
+::selection{background:var(--fuchsia-dim); color:#fff}
+h1,h2,h3,.display{font-family:'Cinzel',serif}
+.mono{font-family:'DM Mono',monospace}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--cyan)}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky; top:0; z-index:50; backdrop-filter:blur(14px);
+  background:rgba(8,6,15,.82); border-bottom:1px solid var(--line);
+}
+.hbar{max-width:1080px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:14px}
+.hlogo{width:36px; height:36px; flex:none}
+.hname{font-family:'Cinzel',serif; font-weight:900; font-size:1.25rem; letter-spacing:.16em;
+  background:linear-gradient(100deg,var(--fuchsia),var(--gold) 55%,var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hep{font-family:'DM Mono',monospace; font-size:.66rem; letter-spacing:.22em; color:var(--faint); text-transform:uppercase}
+.hspace{flex:1}
+#installBtn{
+  border:1px solid var(--gold-dim); background:transparent; color:var(--gold);
+  font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.12em; padding:7px 14px; border-radius:999px;
+  display:none; transition:.2s;
+}
+#installBtn:hover{background:rgba(245,197,66,.1)}
+
+/* ---------- transparency strip ---------- */
+.truth{
+  display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:center; align-items:center;
+  font-family:'DM Mono',monospace; font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:10px 16px; margin:22px 0 0; border:1px dashed var(--line); border-radius:var(--rs); color:var(--mist);
+}
+.truth b{font-weight:500}
+.t-sim{color:var(--warn)} .t-real{color:var(--ok)} .t-key{color:var(--cyan)}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:1px}
+.dot.sim{background:var(--warn)} .dot.real{background:var(--ok)} .dot.key{background:var(--cyan)}
+
+/* ---------- hero ---------- */
+.hero{display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; padding:64px 0 40px}
+.eyebrow{font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.3em; text-transform:uppercase; color:var(--cyan); margin-bottom:16px}
+.hero h1{font-size:clamp(2.4rem,5.5vw,3.9rem); font-weight:900; line-height:1.08; letter-spacing:.04em}
+.hero h1 .g{background:linear-gradient(100deg,var(--fuchsia),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero p.lead{margin-top:20px; font-size:1.08rem; color:var(--mist); max-width:46ch}
+.hero p.lead b{color:var(--ink); font-weight:500}
+.hero-cta{margin-top:28px; display:flex; gap:14px; flex-wrap:wrap}
+.btn{
+  border-radius:999px; padding:13px 26px; font-size:.92rem; font-weight:700; letter-spacing:.03em;
+  border:1px solid transparent; transition:.22s;
+}
+.btn-p{background:linear-gradient(100deg,var(--fuchsia-dim),var(--fuchsia)); color:#fff; box-shadow:0 6px 26px rgba(232,121,249,.25)}
+.btn-p:hover{transform:translateY(-2px); box-shadow:0 10px 32px rgba(232,121,249,.4)}
+.btn-g{background:transparent; border-color:var(--line); color:var(--mist)}
+.btn-g:hover{border-color:var(--cyan-dim); color:var(--cyan)}
+.wheelwrap{position:relative; display:flex; justify-content:center}
+#heroWheel{width:min(340px,80vw); height:auto; filter:drop-shadow(0 0 34px rgba(232,121,249,.22))}
+.wheel-cap{position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); white-space:nowrap;
+  font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--faint)}
+
+/* ---------- chambers ---------- */
+section.chamber{margin-top:64px}
+.ch-head{display:flex; align-items:baseline; gap:16px; border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:22px}
+.ch-num{font-family:'Cinzel',serif; font-weight:700; font-size:1rem; color:var(--gold); letter-spacing:.1em; flex:none}
+.ch-head h2{font-size:clamp(1.3rem,3vw,1.7rem); font-weight:700; letter-spacing:.06em}
+.ch-head .ch-sub{margin-left:auto; font-family:'DM Mono',monospace; font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); text-align:right}
+.ch-why{color:var(--mist); max-width:72ch; margin-bottom:22px}
+.ch-why b{color:var(--ink); font-weight:500}
+
+/* ---------- scenario cards ---------- */
+.scen-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.scen{
+  text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+  padding:20px; transition:.22s; position:relative; overflow:hidden; color:var(--ink);
+}
+.scen::after{content:""; position:absolute; inset:0 0 auto 0; height:3px; background:linear-gradient(90deg,var(--fuchsia),var(--cyan)); opacity:0; transition:.22s}
+.scen:hover{transform:translateY(-3px); border-color:var(--fuchsia-dim)}
+.scen.active{border-color:var(--fuchsia); background:var(--panel2); box-shadow:0 8px 30px rgba(232,121,249,.14)}
+.scen.active::after{opacity:1}
+.scen .sn{font-family:'Cinzel',serif; font-weight:700; font-size:1.05rem; letter-spacing:.12em; color:var(--gold)}
+.scen .st{font-size:.85rem; color:var(--cyan); margin:2px 0 10px; font-weight:500}
+.scen p{font-size:.85rem; color:var(--mist); line-height:1.55}
+.scen .tag{display:inline-block; margin-top:12px; font-family:'DM Mono',monospace; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--warn); border:1px solid rgba(251,191,36,.3); padding:3px 9px; border-radius:999px}
+
+/* ---------- bias lab ---------- */
+.lab{display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:22px}
+.card h3{font-size:.95rem; letter-spacing:.1em; font-weight:700; color:var(--ink); margin-bottom:16px}
+.knob{margin-bottom:20px}
+.knob label{display:flex; justify-content:space-between; align-items:baseline; font-size:.86rem; font-weight:500; margin-bottom:6px}
+.knob label .val{font-family:'DM Mono',monospace; font-size:.8rem; color:var(--gold)}
+.knob .hint{font-size:.74rem; color:var(--faint); margin-top:5px; line-height:1.45}
+input[type=range]{width:100%; appearance:none; -webkit-appearance:none; height:5px; border-radius:99px;
+  background:linear-gradient(90deg,var(--cyan-dim),var(--fuchsia-dim)); outline-offset:4px}
+input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none; width:18px;height:18px;border-radius:50%;
+  background:var(--ink); border:3px solid var(--fuchsia); box-shadow:0 0 12px rgba(232,121,249,.5); cursor:grab}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--ink);border:3px solid var(--fuchsia);cursor:grab}
+.canvasbox{background:var(--deep); border:1px solid var(--line); border-radius:var(--rs); padding:12px}
+.canvasbox canvas{width:100%; height:auto; display:block}
+.cap{font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-top:9px; text-align:center}
+.legend{display:flex; gap:18px; justify-content:center; margin-top:10px; font-size:.74rem; color:var(--mist); flex-wrap:wrap}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
+
+/* ---------- verdict / metric chips ---------- */
+.mgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:18px}
+.metric{background:var(--deep); border:1px solid var(--line); border-radius:var(--rs); padding:13px 14px}
+.metric .mk{font-family:'DM Mono',monospace; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--faint)}
+.metric .mv{font-family:'DM Mono',monospace; font-size:1.25rem; margin-top:4px; font-weight:500}
+.metric .md{font-size:.68rem; color:var(--faint); margin-top:3px}
+.mv.good{color:var(--ok)} .mv.mid{color:var(--warn)} .mv.poor{color:var(--bad)}
+.confrow{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px}
+.confusion{background:var(--deep); border:1px solid var(--line); border-radius:var(--rs); padding:15px}
+.confusion h4{font-family:'DM Mono',monospace; font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; margin-bottom:10px}
+.confusion h4.ga{color:var(--cyan)} .confusion h4.gb{color:var(--fuchsia)}
+.cm{display:grid; grid-template-columns:1fr 1fr; gap:7px}
+.cm div{border-radius:7px; padding:9px 10px; font-family:'DM Mono',monospace; font-size:.78rem; text-align:center}
+.cm .tp{background:rgba(52,211,153,.13); color:var(--ok); border:1px solid rgba(52,211,153,.3)}
+.cm .fn{background:rgba(248,113,113,.13); color:var(--bad); border:1px solid rgba(248,113,113,.3)}
+.cm .fp{background:rgba(251,191,36,.11); color:var(--warn); border:1px solid rgba(251,191,36,.28)}
+.cm .tn{background:rgba(34,211,238,.09); color:var(--cyan); border:1px solid rgba(34,211,238,.24)}
+.cm b{display:block; font-size:1.05rem; margin-top:2px}
+
+/* ---------- judge layout ---------- */
+.judge{display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start}
+.thresholdrow{display:flex; align-items:center; gap:14px; margin:14px 0 6px}
+.thresholdrow .mono{color:var(--gold); font-size:.85rem; white-space:nowrap}
+
+/* ---------- mitigation arena ---------- */
+.mit-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-bottom:20px}
+.mit{
+  text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:var(--rs);
+  padding:15px 16px; transition:.2s; color:var(--ink);
+}
+.mit:hover{border-color:var(--cyan-dim)}
+.mit.active{border-color:var(--cyan); background:var(--panel2); box-shadow:0 6px 22px rgba(34,211,238,.13)}
+.mit .mn{font-weight:700; font-size:.9rem; letter-spacing:.02em}
+.mit .mw{font-family:'DM Mono',monospace; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); margin:3px 0 7px}
+.mit p{font-size:.76rem; color:var(--mist); line-height:1.5}
+.cmp-table{width:100%; border-collapse:collapse; font-family:'DM Mono',monospace; font-size:.78rem}
+.cmp-table th,.cmp-table td{padding:10px 12px; text-align:right; border-bottom:1px solid var(--line)}
+.cmp-table th{font-weight:500; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.cmp-table td:first-child,.cmp-table th:first-child{text-align:left}
+.cmp-table tr.best td{color:var(--ok)}
+.cmp-table td .delta-good{color:var(--ok)} .cmp-table td .delta-bad{color:var(--bad)}
+.verdict{margin-top:16px; border-left:3px solid var(--gold); background:rgba(245,197,66,.06); border-radius:0 var(--rs) var(--rs) 0; padding:14px 18px; font-size:.9rem; color:var(--mist)}
+.verdict b{color:var(--gold); font-weight:700}
+
+/* ---------- impossibility ---------- */
+.imposs{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start}
+.tri{display:grid; gap:10px; margin-top:14px}
+.tri .t{display:flex; justify-content:space-between; align-items:center; background:var(--deep); border:1px solid var(--line); border-radius:var(--rs); padding:12px 15px; font-size:.85rem}
+.tri .t .state{font-family:'DM Mono',monospace; font-size:.72rem; letter-spacing:.1em}
+.state.pass{color:var(--ok)} .state.fail{color:var(--bad)}
+
+/* ---------- privacy ---------- */
+.priv{display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start}
+.ptable{width:100%; border-collapse:collapse; font-family:'DM Mono',monospace; font-size:.76rem}
+.ptable th,.ptable td{padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap}
+.ptable th{font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:500}
+.ptable tr.hot td{color:var(--bad)}
+.kbig{font-family:'DM Mono',monospace; font-size:2.4rem; color:var(--gold); line-height:1}
+.kdesc{font-size:.8rem; color:var(--mist); margin-top:8px}
+
+/* ---------- mentor ---------- */
+.mentor{background:linear-gradient(135deg,var(--panel),var(--panel2)); border:1px solid var(--line); border-radius:var(--r); padding:26px}
+.mentor-top{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+.mentor input[type=password], .mentor textarea{
+  background:var(--deep); border:1px solid var(--line); color:var(--ink); border-radius:var(--rs);
+  padding:11px 14px; font-family:'DM Mono',monospace; font-size:.82rem; width:100%;
+}
+.mentor textarea{min-height:76px; resize:vertical; font-family:'DM Sans',sans-serif}
+.mentor .row{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+.chip{border:1px solid var(--line); background:transparent; color:var(--mist); border-radius:999px; padding:7px 14px; font-size:.76rem; transition:.2s}
+.chip:hover{border-color:var(--fuchsia-dim); color:var(--fuchsia)}
+#mentorOut{margin-top:16px; background:var(--deep); border:1px solid var(--line); border-radius:var(--rs); padding:16px 18px; font-size:.88rem; color:var(--mist); line-height:1.7; white-space:pre-wrap; display:none}
+
+/* ---------- footer ---------- */
+footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; text-align:center}
+.sig{font-family:'Cinzel',serif; font-size:.82rem; letter-spacing:.18em; color:var(--mist)}
+.sig b{background:linear-gradient(100deg,var(--fuchsia),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:700}
+.sig2{font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); margin-top:8px}
+
+/* ---------- responsive & motion ---------- */
+@media(max-width:920px){
+  .hero{grid-template-columns:1fr; text-align:center; padding-top:44px}
+  .hero p.lead{margin-inline:auto} .hero-cta{justify-content:center}
+  .lab,.judge,.imposs,.priv{grid-template-columns:1fr}
+  .scen-grid{grid-template-columns:1fr}
+  .ch-head .ch-sub{display:none}
+}
+@media(max-width:560px){ .confrow{grid-template-columns:1fr} }
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important; transition:none!important; scroll-behavior:auto}
+}
+.reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbar">
+    <canvas id="logoWheel" class="hlogo" width="72" height="72" aria-hidden="true"></canvas>
+    <div>
+      <div class="hname">CHAKRA</div>
+      <div class="hep">AI Education Series · Episode 12</div>
+    </div>
+    <div class="hspace"></div>
+    <button id="installBtn">⤓ Install App</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="truth" role="note" aria-label="Transparency strip">
+    <span class="t-sim"><span class="dot sim"></span><b>Simulated</b>&nbsp;datasets (COMPAS-inspired, synthetic)</span>
+    <span class="t-real"><span class="dot real"></span><b>Real</b>&nbsp;math — logistic regression trained live in your browser</span>
+    <span class="t-key"><span class="dot key"></span><b>BYOK</b>&nbsp;AI mentor — your key, your device, optional</span>
+  </div>
+
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Bias & Ethics Sandbox</div>
+      <h1>The wheel only turns true when <span class="g">every spoke is equal.</span></h1>
+      <p class="lead">Ethics lectures are abstract. <b>CHAKRA lets you cause the harm yourself</b> — poison a training set, watch a model learn injustice, then fight back with real mitigation strategies. Every number on this page is computed live, on your device.</p>
+      <div class="hero-cta">
+        <button class="btn btn-p" onclick="document.getElementById('ch1').scrollIntoView({behavior:'smooth'})">Enter Chamber I</button>
+        <button class="btn btn-g" onclick="document.getElementById('mentor').scrollIntoView({behavior:'smooth'})">Ask the Mentor</button>
+      </div>
+    </div>
+    <div class="wheelwrap">
+      <canvas id="heroWheel" width="680" height="680" role="img" aria-label="Dharma wheel of fairness — six spokes, one polygon per group; bias warps the wheel"></canvas>
+      <div class="wheel-cap">The Dharma Wheel of Fairness — live, from your model</div>
+    </div>
+  </div>
+
+  <!-- ============ CHAMBER I : SCENARIO ============ -->
+  <section class="chamber reveal" id="ch1">
+    <div class="ch-head">
+      <span class="ch-num">I</span><h2>Choose a World</h2>
+      <span class="ch-sub">Dataset · Simulated</span>
+    </div>
+    <p class="ch-why">Three arenas where real AI systems have caused real harm. The data here is <b>synthetic but statistically honest</b> — modelled on the published patterns of COMPAS recidivism scores, credit approval gaps, and the résumé screener a major tech company scrapped in 2018.</p>
+    <div class="scen-grid" role="group" aria-label="Scenario selection">
+      <button class="scen active" data-scen="nyaya">
+        <div class="sn">NYĀYA</div>
+        <div class="st">Recidivism Risk · Justice</div>
+        <p>A court's risk score decides who awaits trial at home and who waits in a cell. Inspired by the COMPAS audit: same behaviour, different error rates by group.</p>
+        <span class="tag">Simulated · COMPAS-inspired</span>
+      </button>
+      <button class="scen" data-scen="artha">
+        <div class="sn">ARTHA</div>
+        <div class="st">Credit Scoring · Finance</div>
+        <p>A lender's model learns from decades of loan files. But those files record who <em>got</em> loans — not who would have repaid one. Selection bias, baked in.</p>
+        <span class="tag">Simulated · Lending patterns</span>
+      </button>
+      <button class="scen" data-scen="karma">
+        <div class="sn">KARMA</div>
+        <div class="st">Hiring AI · Work</div>
+        <p>A résumé screener trained on ten years of past hires learns the past's prejudice as if it were merit. It even finds proxies when you hide the protected column.</p>
+        <span class="tag">Simulated · Résumé screening</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ CHAMBER II : BIAS LAB ============ -->
+  <section class="chamber reveal" id="ch2">
+    <div class="ch-head">
+      <span class="ch-num">II</span><h2>Poison the Well</h2>
+      <span class="ch-sub">Training Data · Real Math</span>
+    </div>
+    <p class="ch-why">Three knobs, three classic corruption mechanisms. Turn them and watch the training data shift below — <b>the model never sees your knobs, only the data they poison.</b></p>
+    <div class="lab">
+      <div class="card">
+        <h3>Corruption Console</h3>
+        <div class="knob">
+          <label>Historical label bias <span class="val" id="vLabel">30%</span></label>
+          <input type="range" id="kLabel" min="0" max="70" value="30" aria-label="Historical label bias percent">
+          <div class="hint">Qualified Group B members were denied in the past — their files now say "bad outcome". The model learns this lie as truth.</div>
+        </div>
+        <div class="knob">
+          <label>Representation gap <span class="val" id="vRep">25%</span></label>
+          <input type="range" id="kRep" min="10" max="50" value="25" aria-label="Group B share of dataset">
+          <div class="hint">Group B's share of the training data. Underrepresented groups get noisier, less confident predictions.</div>
+        </div>
+        <div class="knob">
+          <label>Proxy feature strength <span class="val" id="vProxy">60%</span></label>
+          <input type="range" id="kProxy" min="0" max="100" value="60" aria-label="Proxy feature strength">
+          <div class="hint">A "neutral" feature — PIN code, college name — that secretly encodes group membership. Removing the protected column doesn't remove this.</div>
+        </div>
+        <div class="knob">
+          <label>Sample size <span class="val" id="vN">2,000</span></label>
+          <input type="range" id="kN" min="500" max="4000" step="500" value="2000" aria-label="Sample size">
+          <div class="hint">People in the training set. Regenerated fresh on every change.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>The Training Data, As the Model Sees It</h3>
+        <div class="canvasbox">
+          <canvas id="dataCanvas" width="920" height="420"></canvas>
+          <div class="legend">
+            <span><span class="sw" style="background:#22d3ee"></span>Group A</span>
+            <span><span class="sw" style="background:#e879f9"></span>Group B</span>
+            <span><span class="sw" style="background:transparent;border:1.5px solid #34d399"></span>Label: positive</span>
+            <span><span class="sw" style="background:transparent;border:1.5px dashed #f87171"></span>Label: negative (incl. poisoned)</span>
+          </div>
+          <div class="cap">x → merit signal · y → proxy feature · rings mark labels the model trains on</div>
+        </div>
+        <div class="mgrid" id="dataStats"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAMBER III : JUDGE ============ -->
+  <section class="chamber reveal" id="ch3">
+    <div class="ch-head">
+      <span class="ch-num">III</span><h2>Let the Machine Judge</h2>
+      <span class="ch-sub">Model · Trained Live</span>
+    </div>
+    <p class="ch-why">A logistic regression trains on your poisoned data in milliseconds, then scores everyone. Because this is a simulation, we can do something no real-world auditor can: <b>compare its verdicts to the ground truth</b> of who was actually qualified. Drag the decision threshold and watch justice move.</p>
+    <div class="judge">
+      <div class="card">
+        <h3>Score Distributions & Decision Threshold</h3>
+        <div class="canvasbox">
+          <canvas id="distCanvas" width="920" height="330"></canvas>
+          <div class="cap">model score → · gold line = threshold · everyone right of it is approved</div>
+        </div>
+        <div class="thresholdrow">
+          <span class="mono">Threshold <span id="vThresh">0.50</span></span>
+          <input type="range" id="kThresh" min="10" max="90" value="50" aria-label="Decision threshold">
+        </div>
+        <div class="confrow">
+          <div class="confusion"><h4 class="ga">Group A — vs ground truth</h4><div class="cm" id="cmA"></div></div>
+          <div class="confusion"><h4 class="gb">Group B — vs ground truth</h4><div class="cm" id="cmB"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>The Wheel of This Model</h3>
+        <div class="canvasbox">
+          <canvas id="judgeWheel" width="640" height="640"></canvas>
+          <div class="cap">Six spokes · cyan = Group A · fuchsia = Group B · a fair model draws one wheel, not two</div>
+        </div>
+        <div class="mgrid" id="fairStats"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAMBER IV : MITIGATION ARENA ============ -->
+  <section class="chamber reveal" id="ch4">
+    <div class="ch-head">
+      <span class="ch-num">IV</span><h2>Fight Back</h2>
+      <span class="ch-sub">Mitigation · Compared Live</span>
+    </div>
+    <p class="ch-why">Five real strategies from the fairness literature, each retraining or re-thresholding on your exact poisoned data. Toggle them on and the arena table shows what each one buys — and what it costs. <b>There is no free lunch; there are only informed trades.</b></p>
+    <div class="mit-grid" id="mitGrid" role="group" aria-label="Mitigation strategies">
+      <button class="mit active" data-mit="none"><div class="mn">Do Nothing</div><div class="mw">Baseline</div><p>Ship the biased model as-is. The industry default, and the reason this app exists.</p></button>
+      <button class="mit" data-mit="blind"><div class="mn">Fairness Through Blindness</div><div class="mw">Pre-processing</div><p>Delete the proxy feature and hope. Watch how little it helps when bias lives in the labels.</p></button>
+      <button class="mit" data-mit="resample"><div class="mn">Resampling</div><div class="mw">Pre-processing</div><p>Oversample the underrepresented group×label cells until the table balances.</p></button>
+      <button class="mit" data-mit="reweight"><div class="mn">Reweighting</div><div class="mw">Kamiran–Calders</div><p>Keep every row, but weight each one so no group×label combination dominates the loss.</p></button>
+      <button class="mit" data-mit="threshold"><div class="mn">Group Thresholds</div><div class="mw">Post-processing</div><p>Separate cut-offs per group, tuned to equalise opportunity. Powerful, and legally contested.</p></button>
+    </div>
+    <div class="card">
+      <h3>Arena Results — active strategies vs baseline</h3>
+      <div style="overflow-x:auto">
+        <table class="cmp-table" id="cmpTable"></table>
+      </div>
+      <div class="verdict" id="mitVerdict"></div>
+    </div>
+  </section>
+
+  <!-- ============ CHAMBER V : IMPOSSIBILITY ============ -->
+  <section class="chamber reveal" id="ch5">
+    <div class="ch-head">
+      <span class="ch-num">V</span><h2>The Impossible Wheel</h2>
+      <span class="ch-sub">Theorem · Interactive</span>
+    </div>
+    <p class="ch-why">Kleinberg, Mullainathan & Raghavan proved it in 2016: when two groups have different base rates, <b>no classifier can equalise calibration, false-positive rates, and false-negative rates at once.</b> This was the heart of the COMPAS debate — both sides were right about their own metric. Slide the threshold and try to light all three lamps green. You can't. That's the theorem.</p>
+    <div class="imposs">
+      <div class="card">
+        <h3>One Threshold, Three Demands</h3>
+        <div class="knob">
+          <label>Base rate gap between groups <span class="val" id="vGap">20%</span></label>
+          <input type="range" id="kGap" min="0" max="40" value="20" aria-label="Base rate gap">
+          <div class="hint">Set to 0% and equality becomes possible — the theorem only bites when the world itself is unequal.</div>
+        </div>
+        <div class="knob">
+          <label>Shared decision threshold <span class="val" id="vIThresh">0.50</span></label>
+          <input type="range" id="kIThresh" min="15" max="85" value="50" aria-label="Impossibility threshold">
+        </div>
+        <div class="tri" id="triLamps"></div>
+      </div>
+      <div class="card">
+        <h3>Where the Errors Fall</h3>
+        <div class="canvasbox">
+          <canvas id="impossCanvas" width="900" height="360"></canvas>
+          <div class="cap">per-group calibration, FPR and FNR at your chosen threshold</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAMBER VI : PRIVACY ============ -->
+  <section class="chamber reveal" id="ch6">
+    <div class="ch-head">
+      <span class="ch-num">VI</span><h2>The Anonymity Illusion</h2>
+      <span class="ch-sub">Privacy · k-anonymity</span>
+    </div>
+    <p class="ch-why">"We removed the names" is not privacy. With PIN code, age and gender alone, most people are unique in a dataset — Latanya Sweeney re-identified a US governor's medical file this way in 1997. Slide the generaliser and watch <b>k-anonymity</b> rise as detail (and utility) falls.</p>
+    <div class="priv">
+      <div class="card">
+        <h3>The "Anonymised" Release</h3>
+        <div style="overflow-x:auto"><table class="ptable" id="privTable"></table></div>
+        <div class="cap" style="text-align:left; margin-top:12px">rows in red are unique on their quasi-identifiers — one join away from a name</div>
+      </div>
+      <div class="card">
+        <h3>Generaliser</h3>
+        <div class="knob">
+          <label>Generalisation level <span class="val" id="vPriv">0 — raw</span></label>
+          <input type="range" id="kPriv" min="0" max="3" value="0" aria-label="Generalisation level">
+          <div class="hint">0: raw · 1: age → decade band · 2: + PIN → district · 3: + PIN → state, sex hidden</div>
+        </div>
+        <div style="margin-top:22px">
+          <div class="mk mono" style="font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--faint)">k-anonymity</div>
+          <div class="kbig" id="kVal">k = 1</div>
+          <div class="kdesc" id="kDesc"></div>
+        </div>
+        <div class="mgrid" id="privStats" style="grid-template-columns:1fr"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MENTOR ============ -->
+  <section class="chamber reveal" id="mentor">
+    <div class="ch-head">
+      <span class="ch-num">☸</span><h2>DHARMA Mentor</h2>
+      <span class="ch-sub">BYOK · Optional AI Layer</span>
+    </div>
+    <p class="ch-why">Everything above works offline, forever, for free. This one panel is different: paste your own Anthropic API key and Claude will read your <b>live sandbox state</b> — your knobs, your metrics, your chosen mitigations — and explain what it means. Your key stays in this browser's localStorage; it is sent only to api.anthropic.com.</p>
+    <div class="mentor">
+      <div class="mentor-top">
+        <input type="password" id="apiKey" placeholder="sk-ant-… (stored locally, never on any server of mine)" style="flex:1; min-width:240px" aria-label="Anthropic API key">
+        <button class="btn btn-g" id="saveKey">Save key</button>
+      </div>
+      <textarea id="mentorQ" placeholder="Ask anything — e.g. 'My equal-opportunity gap is 24%. In plain words, who is being hurt and how?'"></textarea>
+      <div class="row">
+        <button class="btn btn-p" id="askBtn">Ask with my live results</button>
+        <button class="chip" data-q="Explain my current fairness metrics like I'm a district judge with no ML background.">Explain like a judge</button>
+        <button class="chip" data-q="Which mitigation should I pick for this scenario and why? Be honest about the trade-offs.">Pick my mitigation</button>
+        <button class="chip" data-q="Relate my current results to the real COMPAS debate.">Connect to COMPAS</button>
+      </div>
+      <div id="mentorOut" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="sig">Designed & Architected by <b>Krishnamurthy Kandregula</b> · Made by Claude</div>
+    <div class="sig2">CHAKRA · AI Education Series Ep. 12 · Simulated data, real mathematics · Works offline</div>
+  </footer>
+
+</main>
+<script>
+"use strict";
+/* ================================================================
+   CHAKRA — AI Bias & Ethics Sandbox · Tranzit architecture
+   Simulated data · Real math · BYOK AI layer
+   ================================================================ */
+
+/* ---------- utilities ---------- */
+const $ = id => document.getElementById(id);
+const rnd = () => Math.random();
+let seed = 42;
+function srand(){ seed = (seed*1103515245 + 12345) & 0x7fffffff; return seed/0x7fffffff; }
+function gauss(mu=0, sig=1){ let u=0,v=0; while(!u)u=srand(); while(!v)v=srand();
+  return mu + sig*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+const sigmoid = z => 1/(1+Math.exp(-z));
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const pct = x => (100*x).toFixed(1)+"%";
+const fmt = x => x.toFixed(3);
+
+/* ---------- scenarios (SIMULATED, pattern-honest) ---------- */
+const SCEN = {
+  nyaya:{ name:"NYĀYA · Recidivism", posWord:"released", negWord:"detained",
+    baseA:.62, baseB:.55, defaults:{label:30, rep:35, proxy:60},
+    story:"Positive = would not reoffend. Historical bias: past over-policing recorded qualified Group B people as re-offenders." },
+  artha:{ name:"ARTHA · Credit", posWord:"approved", negWord:"rejected",
+    baseA:.60, baseB:.58, defaults:{label:25, rep:25, proxy:75},
+    story:"Positive = would repay. Historical bias: creditworthy Group B applicants were denied, so their repayment was never recorded." },
+  karma:{ name:"KARMA · Hiring", posWord:"shortlisted", negWord:"screened out",
+    baseA:.55, baseB:.55, defaults:{label:40, rep:20, proxy:85},
+    story:"Positive = would perform well. Historical bias: equally capable Group B candidates were rarely hired, so the archive calls them 'not a fit'." }
+};
+let scen = "nyaya";
+
+/* ---------- state ---------- */
+const S = {
+  data:[], model:null, thresh:.5,
+  activeMits:new Set(["none"]),
+  results:{},           // mit -> metrics
+  wheelPhase:0
+};
+
+/* ---------- data engine ---------- */
+function genData(){
+  seed = 1234 + $("kLabel").value*7 + $("kRep").value*13 + $("kProxy").value*17 + (+$("kN").value);
+  const n = +$("kN").value;
+  const repB = $("kRep").value/100;
+  const labelBias = $("kLabel").value/100;
+  const proxyK = $("kProxy").value/100;
+  const cfg = SCEN[scen];
+  const rows = [];
+  for(let i=0;i<n;i++){
+    const g = srand() < repB ? "B" : "A";
+    const base = g==="A" ? cfg.baseA : cfg.baseB;
+    const truth = srand() < base ? 1 : 0;                       // ground truth qualification
+    const x1 = clamp(truth ? gauss(.66,.14) : gauss(.36,.14), 0, 1);  // merit signal
+    const x2 = clamp((g==="B"?1:0)*proxyK*.8 + gauss(.12,.10), 0, 1); // proxy feature
+    let y = truth;
+    if(g==="B" && truth===1 && srand() < labelBias) y = 0;      // poisoned label
+    rows.push({g, truth, y, x1, x2, w:1});
+  }
+  S.data = rows;
+}
+
+/* ---------- logistic regression (batch GD, weighted) ---------- */
+function train(rows, useProxy=true){
+  let w0=0, w1=0, w2=0; const lr=1.6, epochs=140;
+  const n = rows.length;
+  for(let e=0;e<epochs;e++){
+    let g0=0,g1=0,g2=0, W=0;
+    for(const r of rows){
+      const x2 = useProxy ? r.x2 : 0;
+      const p = sigmoid(w0 + w1*r.x1 + w2*x2);
+      const err = (p - r.y) * r.w;
+      g0 += err; g1 += err*r.x1; g2 += err*x2; W += r.w;
+    }
+    w0 -= lr*g0/W; w1 -= lr*g1/W; w2 -= lr*g2/W;
+  }
+  return {w0,w1,w2,useProxy, score:r=>sigmoid(w0 + w1*r.x1 + w2*(useProxy?r.x2:0))};
+}
+
+/* ---------- metrics vs ground truth ---------- */
+function confusion(rows, scoreFn, thr, group, thrB){
+  let tp=0,fp=0,tn=0,fn=0;
+  for(const r of rows){
+    if(group && r.g!==group) continue;
+    const t = (thrB!==undefined && r.g==="B") ? thrB : thr;
+    const pred = scoreFn(r) >= t ? 1 : 0;
+    if(r.truth===1 && pred===1) tp++;
+    else if(r.truth===1 && pred===0) fn++;
+    else if(r.truth===0 && pred===1) fp++;
+    else tn++;
+  }
+  const P=tp+fn, N=fp+tn, sel=(tp+fp)/Math.max(1,tp+fp+tn+fn);
+  return {tp,fp,tn,fn,
+    tpr:P?tp/P:0, fpr:N?fp/N:0, prec:(tp+fp)?tp/(tp+fp):0,
+    npv:(tn+fn)?tn/(tn+fn):0, acc:(tp+tn)/Math.max(1,tp+fp+tn+fn), sel};
+}
+function fairness(rows, scoreFn, thr, thrB){
+  const A = confusion(rows, scoreFn, thr, "A", thrB);
+  const B = confusion(rows, scoreFn, thr, "B", thrB);
+  const all = confusion(rows, scoreFn, thr, null, thrB);
+  return {A,B,all,
+    dp: Math.abs(A.sel - B.sel),          // demographic parity gap
+    eo: Math.abs(A.tpr - B.tpr),          // equal opportunity gap
+    ao: (Math.abs(A.tpr-B.tpr)+Math.abs(A.fpr-B.fpr))/2, // avg odds
+    pp: Math.abs(A.prec - B.prec)};       // predictive parity gap
+}
+
+/* ---------- mitigations ---------- */
+function applyMitigation(kind){
+  const base = S.data;
+  if(kind==="none")   return {model:train(base,true)};
+  if(kind==="blind")  return {model:train(base,false)};
+  if(kind==="resample"){
+    const cells = {}; base.forEach(r=>{ const k=r.g+r.y; (cells[k]=cells[k]||[]).push(r); });
+    const target = Math.max(...Object.values(cells).map(c=>c.length));
+    const boosted = [];
+    for(const k in cells){ const c=cells[k];
+      for(let i=0;i<target;i++) boosted.push({...c[i%c.length]});
+    }
+    return {model:train(boosted,true)};
+  }
+  if(kind==="reweight"){ // Kamiran–Calders: w = P(g)P(y) / P(g,y)
+    const n=base.length, cg={}, cy={}, cgy={};
+    base.forEach(r=>{cg[r.g]=(cg[r.g]||0)+1; cy[r.y]=(cy[r.y]||0)+1; const k=r.g+r.y; cgy[k]=(cgy[k]||0)+1;});
+    const rows = base.map(r=>({...r, w:(cg[r.g]/n)*(cy[r.y]/n)/((cgy[r.g+r.y]||1)/n)}));
+    return {model:train(rows,true)};
+  }
+  if(kind==="threshold"){ // equalise TPR to Group A's at global threshold
+    const m = train(base,true);
+    const targetTpr = confusion(base, m.score, S.thresh, "A").tpr;
+    let bestT=S.thresh, bestD=1e9;
+    for(let t=.05;t<=.95;t+=.01){
+      const d = Math.abs(confusion(base, m.score, t, "B").tpr - targetTpr);
+      if(d<bestD){bestD=d;bestT=t;}
+    }
+    return {model:m, thrB:bestT};
+  }
+}
+function trainAllModels(){          // heavy step — once per data change
+  S.models = {};
+  for(const k of ["none","blind","resample","reweight"]) S.models[k]=applyMitigation(k);
+  S.models.threshold = {model:S.models.none.model};   // thrB derived per-threshold below
+}
+function evalMit(kind){             // cheap step — reuses cached models
+  const m = S.models[kind];
+  let thrB;
+  if(kind==="threshold"){           // re-tune Group B cut-off for current threshold
+    const targetTpr = confusion(S.data, m.model.score, S.thresh, "A").tpr;
+    let bestT=S.thresh, bestD=1e9;
+    for(let t=.05;t<=.95;t+=.01){
+      const d = Math.abs(confusion(S.data, m.model.score, t, "B").tpr - targetTpr);
+      if(d<bestD){bestD=d;bestT=t;}
+    }
+    thrB = m.thrB = bestT;
+  }
+  return fairness(S.data, m.model.score, S.thresh, thrB);
+}
+
+/* ================================================================
+   CANVAS RENDERERS
+   ================================================================ */
+const CA="#22d3ee", CB="#e879f9", GOLD="#f5c542", OK="#34d399", BAD="#f87171";
+
+/* --- Dharma wheel: 6 spokes = [Selection, TPR, 1-FPR, Precision, NPV, Accuracy] --- */
+const SPOKES = ["SELECT","TPR","1−FPR","PREC","NPV","ACC"];
+function wheelVals(c){ return [c.sel, c.tpr, 1-c.fpr, c.prec, c.npv, c.acc]; }
+function drawWheel(cv, mA, mB, phase, big){
+  const ctx=cv.getContext("2d"), W=cv.width, H=cv.height, cx=W/2, cy=H/2, R=W*.36;
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(phase);
+  // rim + hub
+  ctx.strokeStyle="rgba(245,197,66,.55)"; ctx.lineWidth=big?4:3;
+  ctx.beginPath(); ctx.arc(0,0,R*1.12,0,7); ctx.stroke();
+  ctx.strokeStyle="rgba(184,180,204,.18)";
+  for(const f of [.25,.5,.75,1]){ ctx.beginPath(); ctx.arc(0,0,R*f,0,7); ctx.lineWidth=1; ctx.stroke(); }
+  // spokes
+  for(let i=0;i<6;i++){
+    const a = i*Math.PI/3 - Math.PI/2;
+    ctx.strokeStyle="rgba(184,180,204,.28)"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(R*1.12*Math.cos(a), R*1.12*Math.sin(a)); ctx.stroke();
+    ctx.fillStyle="rgba(245,197,66,.9)";
+    ctx.beginPath(); ctx.arc(R*1.12*Math.cos(a), R*1.12*Math.sin(a), big?6:4, 0, 7); ctx.fill();
+  }
+  const poly=(vals,color,fill)=>{
+    ctx.beginPath();
+    vals.forEach((v,i)=>{ const a=i*Math.PI/3 - Math.PI/2, r=R*clamp(v,0,1);
+      i?ctx.lineTo(r*Math.cos(a),r*Math.sin(a)):ctx.moveTo(r*Math.cos(a),r*Math.sin(a)); });
+    ctx.closePath(); ctx.strokeStyle=color; ctx.lineWidth=big?3:2.2; ctx.stroke();
+    ctx.fillStyle=fill; ctx.fill();
+  };
+  if(mA) poly(wheelVals(mA), CA, "rgba(34,211,238,.10)");
+  if(mB) poly(wheelVals(mB), CB, "rgba(232,121,249,.12)");
+  ctx.fillStyle=GOLD; ctx.beginPath(); ctx.arc(0,0,big?9:6,0,7); ctx.fill();
+  ctx.restore();
+  // static labels
+  ctx.fillStyle="rgba(184,180,204,.85)"; ctx.font=`${big?15:12}px 'DM Mono',monospace`; ctx.textAlign="center";
+  SPOKES.forEach((s,i)=>{ const a=i*Math.PI/3 - Math.PI/2;
+    ctx.fillText(s, cx + R*1.32*Math.cos(a), cy + R*1.32*Math.sin(a)+4); });
+}
+
+/* --- scatter of training data --- */
+function drawData(){
+  const cv=$("dataCanvas"), ctx=cv.getContext("2d"), W=cv.width, H=cv.height, P=34;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="rgba(42,36,64,1)"; ctx.strokeRect(P,10,W-P-12,H-P-10);
+  ctx.font="11px 'DM Mono',monospace"; ctx.fillStyle="rgba(125,120,150,.9)";
+  ctx.fillText("merit →", W-70, H-8); ctx.save(); ctx.translate(12,90); ctx.rotate(-Math.PI/2); ctx.fillText("proxy →",0,0); ctx.restore();
+  for(const r of S.data){
+    const x = P + r.x1*(W-P-12-8)+4, y = H-P - r.x2*(H-P-20)+0;
+    ctx.fillStyle = r.g==="A" ? "rgba(34,211,238,.55)" : "rgba(232,121,249,.6)";
+    ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.fill();
+    if(r.y===1){ ctx.strokeStyle="rgba(52,211,153,.5)"; ctx.setLineDash([]); }
+    else { ctx.strokeStyle = (r.truth===1)?"rgba(248,113,113,.95)":"rgba(248,113,113,.30)"; ctx.setLineDash(r.truth===1?[2,2]:[]); }
+    ctx.beginPath(); ctx.arc(x,y,4.6,0,7); ctx.lineWidth=1.1; ctx.stroke(); ctx.setLineDash([]);
+  }
+}
+
+/* --- score histograms --- */
+function drawDist(model, thrB){
+  const cv=$("distCanvas"), ctx=cv.getContext("2d"), W=cv.width, H=cv.height, P=30;
+  ctx.clearRect(0,0,W,H);
+  const bins=36, hA=new Array(bins).fill(0), hB=new Array(bins).fill(0);
+  let nA=0,nB=0;
+  for(const r of S.data){ const b=clamp(Math.floor(model.score(r)*bins),0,bins-1);
+    if(r.g==="A"){hA[b]++;nA++;} else {hB[b]++;nB++;} }
+  const mx=Math.max(...hA.map(v=>v/nA), ...hB.map(v=>v/nB), .01);
+  const bw=(W-2*P)/bins;
+  const bars=(h,n,color)=>{ ctx.fillStyle=color;
+    h.forEach((v,i)=>{ const hh=(v/n/mx)*(H-60);
+      ctx.fillRect(P+i*bw+1, H-30-hh, bw-2, hh); }); };
+  ctx.globalAlpha=.55; bars(hA,nA,CA); bars(hB,nB,CB); ctx.globalAlpha=1;
+  // threshold(s)
+  const line=(t,color,dash)=>{ const x=P+t*(W-2*P);
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.setLineDash(dash||[]);
+    ctx.beginPath(); ctx.moveTo(x,14); ctx.lineTo(x,H-30); ctx.stroke(); ctx.setLineDash([]); };
+  line(S.thresh, GOLD);
+  if(thrB!==undefined) line(thrB, CB, [6,4]);
+  ctx.font="11px 'DM Mono',monospace"; ctx.fillStyle="rgba(125,120,150,.9)";
+  ctx.fillText("0", P-4, H-14); ctx.fillText("1", W-P-4, H-14);
+}
+
+/* --- impossibility chamber --- */
+function impossState(){
+  const gap = $("kGap").value/100, t = $("kIThresh").value/100;
+  seed = 999 + $("kGap").value;
+  const rows=[];
+  for(let i=0;i<3000;i++){
+    const g = i%2 ? "B":"A";
+    const base = .6 - (g==="B"?gap:0);
+    const truth = srand()<base ? 1:0;
+    const sc = clamp(truth?gauss(.62,.16):gauss(.38,.16),0,1);
+    rows.push({g,truth,score:sc});
+  }
+  const m=g=>{ let tp=0,fp=0,tn=0,fn=0;
+    rows.forEach(r=>{ if(r.g!==g)return; const p=r.score>=t?1:0;
+      if(r.truth&&p)tp++; else if(r.truth&&!p)fn++; else if(!r.truth&&p)fp++; else tn++; });
+    return {ppv:(tp+fp)?tp/(tp+fp):0, fpr:(fp+tn)?fp/(fp+tn):0, fnr:(tp+fn)?fn/(tp+fn):0}; };
+  return {A:m("A"), B:m("B")};
+}
+function drawImposs(){
+  const {A,B} = impossState();
+  const cv=$("impossCanvas"), ctx=cv.getContext("2d"), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const groups=[["Calibration (PPV)",A.ppv,B.ppv],["False-positive rate",A.fpr,B.fpr],["False-negative rate",A.fnr,B.fnr]];
+  const colW=(W-60)/3;
+  groups.forEach((g,i)=>{
+    const x0=40+i*colW;
+    ctx.fillStyle="rgba(184,180,204,.85)"; ctx.font="12px 'DM Mono',monospace"; ctx.textAlign="center";
+    ctx.fillText(g[0], x0+colW/2-20, 22);
+    const bar=(val,off,color)=>{ const bh=val*(H-90);
+      ctx.fillStyle=color; ctx.fillRect(x0+off, H-40-bh, 44, bh);
+      ctx.fillStyle=color; ctx.fillText(pct(val), x0+off+22, H-46-bh); };
+    bar(g[1], colW/2-70, CA); bar(g[2], colW/2+6, CB);
+  });
+  ctx.textAlign="left";
+  const lamps=$("triLamps");
+  const tol=.03;
+  const items=[["Equal calibration", Math.abs(A.ppv-B.ppv)<=tol, Math.abs(A.ppv-B.ppv)],
+               ["Equal false-positive rates", Math.abs(A.fpr-B.fpr)<=tol, Math.abs(A.fpr-B.fpr)],
+               ["Equal false-negative rates", Math.abs(A.fnr-B.fnr)<=tol, Math.abs(A.fnr-B.fnr)]];
+  lamps.innerHTML = items.map(x=>`<div class="t"><span>${x[0]}</span>
+    <span class="state ${x[1]?'pass':'fail'}">${x[1]?'● SATISFIED':'● VIOLATED'} · gap ${pct(x[2])}</span></div>`).join("");
+}
+
+/* ================================================================
+   PIPELINE + UI
+   ================================================================ */
+function grade(gap){ return gap<=.05?"good":(gap<=.15?"mid":"poor"); }
+function metricChip(k,v,d,cls){ return `<div class="metric"><div class="mk">${k}</div>
+  <div class="mv ${cls||""}">${v}</div><div class="md">${d}</div></div>`; }
+
+function runAll(){
+  genData(); drawData();
+  // data stats
+  const nB=S.data.filter(r=>r.g==="B").length;
+  const poisoned=S.data.filter(r=>r.g==="B"&&r.truth===1&&r.y===0).length;
+  const qB=S.data.filter(r=>r.g==="B"&&r.truth===1).length;
+  $("dataStats").innerHTML =
+    metricChip("Rows", S.data.length.toLocaleString(), "people in the training set") +
+    metricChip("Group B share", pct(nB/S.data.length), "representation in data") +
+    metricChip("Poisoned labels", poisoned.toLocaleString(), "qualified B people recorded as failures", poisoned>0?"poor":"good") +
+    metricChip("Truth erased", pct(qB?poisoned/qB:0), "of qualified Group B mislabelled", grade(qB?poisoned/qB:0));
+
+  // train once per data change, then evaluate everything from cache
+  trainAllModels();
+  S.results={};
+  for(const k of ["none","blind","resample","reweight","threshold"]) S.results[k]=evalMit(k);
+
+  renderJudge(); renderArena(); drawImposs();
+}
+
+function renderJudge(){
+  const model = S.models.none.model;
+  const F = S.results.none;
+  drawDist(model);
+  const cm=(c,el)=>{ $(el).innerHTML =
+    `<div class="tp">TP<b>${c.tp}</b></div><div class="fn">FN — qualified, denied<b>${c.fn}</b></div>
+     <div class="fp">FP<b>${c.fp}</b></div><div class="tn">TN<b>${c.tn}</b></div>`; };
+  cm(F.A,"cmA"); cm(F.B,"cmB");
+  drawWheel($("judgeWheel"), F.A, F.B, 0, false);
+  $("fairStats").innerHTML =
+    metricChip("Demographic parity gap", pct(F.dp), "selection-rate difference A vs B", grade(F.dp)) +
+    metricChip("Equal opportunity gap", pct(F.eo), "TPR difference — qualified people treated unequally", grade(F.eo)) +
+    metricChip("Avg odds gap", pct(F.ao), "mean of TPR + FPR differences", grade(F.ao)) +
+    metricChip("Predictive parity gap", pct(F.pp), "precision difference between groups", grade(F.pp));
+  S.judgeF = F;
+}
+
+const MITNAME={none:"Do nothing",blind:"Blindness",resample:"Resampling",reweight:"Reweighting",threshold:"Group thresholds"};
+function renderArena(){
+  const rows=[...S.activeMits]; if(!rows.includes("none")) rows.unshift("none");
+  const base=S.results.none;
+  let best=null,bestScore=1e9;
+  const tr = rows.map(k=>{
+    const F=S.results[k];
+    const score = F.eo*2 + F.dp + (base.all.acc - F.all.acc)*1.5;
+    if(k!=="none" && score<bestScore){bestScore=score;best=k;}
+    const d = v=>{ const dd=v; return dd; };
+    const cell=(v,b)=>{ const diff=v-b, s=diff<-.005?"delta-good":(diff>.005?"delta-bad":"");
+      return `<td>${pct(v)} <span class="${s}">${diff===0?"":(diff<0?"▼":"▲")}</span></td>`; };
+    return `<tr${k===best?' class="best"':''}><td>${MITNAME[k]}</td>
+      ${cell(F.eo,base.eo)}${cell(F.dp,base.dp)}${cell(F.ao,base.ao)}
+      <td>${pct(F.all.acc)}</td><td>${F.B.fn}</td></tr>`;
+  }).join("");
+  $("cmpTable").innerHTML = `<tr><th>Strategy</th><th>Equal-opp gap</th><th>Dem-parity gap</th><th>Avg-odds gap</th><th>Accuracy</th><th>B qualified denied</th></tr>${tr}`;
+  const F = best?S.results[best]:base;
+  $("mitVerdict").innerHTML = best
+    ? `<b>${MITNAME[best]}</b> wins this arena: equal-opportunity gap ${pct(base.eo)} → ${pct(F.eo)}, accuracy ${pct(base.all.acc)} → ${pct(F.all.acc)}. The count of qualified Group B people wrongly ${SCEN[scen].negWord} moves from <b>${base.B.fn}</b> to <b>${F.B.fn}</b>. That number is the point — each unit is a person.`
+    : `Toggle strategies above to enter them in the arena. The baseline currently denies <b>${base.B.fn}</b> qualified Group B people.`;
+}
+
+/* ---------- privacy chamber ---------- */
+const PEOPLE=[
+  ["Ananya","500081",34,"F",72],["Ravi","500034",29,"M",41],["Meera","500081",34,"F",68],
+  ["Farhan","500002",58,"M",55],["Lakshmi","500034",52,"F",63],["Arjun","500002",23,"M",38],
+  ["Divya","500081",38,"F",77],["Kiran","500034",29,"M",49]
+];
+function privRender(){
+  const L=+$("kPriv").value;
+  const gen=p=>{
+    let pin=p[1], age=String(p[2]), sex=p[3];
+    if(L>=1) age=(Math.floor(p[2]/10)*10)+"s";
+    if(L>=2) pin=pin.slice(0,4)+"**";
+    if(L>=3){ pin="5*****"; sex="✱"; }
+    return [pin,age,sex];
+  };
+  const keys=PEOPLE.map(p=>gen(p).join("|"));
+  const counts={}; keys.forEach(k=>counts[k]=(counts[k]||0)+1);
+  const kmin=Math.min(...Object.values(counts));
+  $("privTable").innerHTML = `<tr><th>Name</th><th>PIN</th><th>Age</th><th>Sex</th><th>Risk score</th></tr>` +
+    PEOPLE.map((p,i)=>{ const g=gen(p); const hot=counts[keys[i]]===1;
+      return `<tr${hot?' class="hot"':''}><td>— removed —</td><td>${g[0]}</td><td>${g[1]}</td><td>${g[2]}</td><td>${p[4]}</td></tr>`; }).join("");
+  $("vPriv").textContent = L+" — "+["raw","age band","+ district","+ state, sex ✱"][L];
+  $("kVal").textContent = "k = "+kmin;
+  $("kDesc").textContent = kmin===1
+    ? "At least one person is unique on these columns. One voter-roll join and their 'anonymous' risk score has a name."
+    : `Every person hides in a crowd of at least ${kmin}. Re-identification chance per row ≤ ${(100/kmin).toFixed(0)}%.`;
+  $("privStats").innerHTML = metricChip("Utility remaining",
+    ["100%","74%","52%","31%"][L],
+    "how much analytic detail survives generalisation — privacy is a trade, not a toggle",
+    ["poor","mid","good","good"][L]==="poor"&&kmin===1?"poor":(kmin>=2?"good":"mid"));
+}
+
+/* ---------- mentor (BYOK) ---------- */
+$("apiKey").value = localStorage.getItem("chakra_key")||"";
+$("saveKey").onclick=()=>{ localStorage.setItem("chakra_key",$("apiKey").value.trim());
+  $("saveKey").textContent="Saved ✓"; setTimeout(()=>$("saveKey").textContent="Save key",1400); };
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ $("mentorQ").value=c.dataset.q; ask(); });
+$("askBtn").onclick=()=>ask();
+function stateBrief(){
+  const F=S.judgeF||{}, b=S.results.none||{};
+  return `Scenario: ${SCEN[scen].name}. ${SCEN[scen].story}
+Knobs — label bias ${$("kLabel").value}%, Group B share ${$("kRep").value}%, proxy strength ${$("kProxy").value}%, threshold ${S.thresh}.
+Baseline metrics — demographic parity gap ${pct(b.dp||0)}, equal opportunity gap ${pct(b.eo||0)}, avg odds gap ${pct(b.ao||0)}, accuracy ${pct(b.all?b.all.acc:0)}. Qualified Group B denied: ${b.B?b.B.fn:0}.
+Active mitigations: ${[...S.activeMits].join(", ")}.
+All data is synthetic; the app is an educational sandbox (CHAKRA, AI Education Series).`;
+}
+async function ask(){
+  const key=localStorage.getItem("chakra_key");
+  const out=$("mentorOut"); out.style.display="block";
+  if(!key){ out.textContent="No API key saved. Everything else in CHAKRA works without one — this panel alone needs your Anthropic key (paste above, it never leaves this device except to api.anthropic.com)."; return; }
+  const q=$("mentorQ").value.trim()||"Explain my current results simply.";
+  out.textContent="The mentor is reading your sandbox…";
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":key,
+        "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:700,
+        system:"You are DHARMA, the mentor inside CHAKRA, an AI bias & ethics teaching sandbox by Krishnamurthy Kandregula. Explain fairness concepts warmly, concretely and briefly (under 250 words), grounded in the live state provided. Plain prose, no markdown headers.",
+        messages:[{role:"user",content:stateBrief()+"\n\nLearner's question: "+q}]})
+    });
+    const data=await res.json();
+    out.textContent = data.content?.map(c=>c.text||"").join("\n") || ("Error: "+JSON.stringify(data.error||data));
+  }catch(e){ out.textContent="Could not reach api.anthropic.com — "+e.message+". Check the key and your connection; everything else in CHAKRA keeps working offline."; }
+}
+
+/* ---------- events ---------- */
+document.querySelectorAll(".scen").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".scen").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); scen=b.dataset.scen;
+  const d=SCEN[scen].defaults;
+  $("kLabel").value=d.label; $("kRep").value=d.rep; $("kProxy").value=d.proxy;
+  syncKnobs(); runAll();
+});
+function syncKnobs(){
+  $("vLabel").textContent=$("kLabel").value+"%";
+  $("vRep").textContent=$("kRep").value+"%";
+  $("vProxy").textContent=$("kProxy").value+"%";
+  $("vN").textContent=(+$("kN").value).toLocaleString();
+  $("vThresh").textContent=(S.thresh=$("kThresh").value/100).toFixed(2);
+  $("vGap").textContent=$("kGap").value+"%";
+  $("vIThresh").textContent=($("kIThresh").value/100).toFixed(2);
+}
+let deb;
+["kLabel","kRep","kProxy","kN"].forEach(id=>$(id).oninput=()=>{ syncKnobs();
+  clearTimeout(deb); deb=setTimeout(runAll,120); });
+$("kThresh").oninput=()=>{ syncKnobs();
+  for(const k of ["none","blind","resample","reweight","threshold"]) S.results[k]=evalMit(k);
+  renderJudge(); renderArena(); };
+["kGap","kIThresh"].forEach(id=>$(id).oninput=()=>{ syncKnobs(); drawImposs(); });
+$("kPriv").oninput=privRender;
+document.querySelectorAll(".mit").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.mit; if(k==="none")return;
+  b.classList.toggle("active");
+  b.classList.contains("active")?S.activeMits.add(k):S.activeMits.delete(k);
+  renderArena();
+});
+
+/* ---------- hero + logo wheels (ambient) ---------- */
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function ambient(){
+  const F=S.judgeF;
+  drawWheel($("heroWheel"), F?F.A:null, F?F.B:null, S.wheelPhase, true);
+  drawWheel($("logoWheel"), {sel:.8,tpr:.8,fpr:.2,prec:.8,npv:.8,acc:.8},
+                            {sel:.8,tpr:.8,fpr:.2,prec:.8,npv:.8,acc:.8}, S.wheelPhase, false);
+  if(!reduced) S.wheelPhase += .0035;
+  requestAnimationFrame(ambient);
+}
+
+/* ---------- reveal on scroll ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add("in")),{threshold:.08});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+
+/* ================================================================
+   PWA — Tranzit pattern: blob manifest, blob SW, canvas icon
+   ================================================================ */
+function makeIcon(size){
+  const c=document.createElement("canvas"); c.width=c.height=size;
+  const x=c.getContext("2d");
+  x.fillStyle="#08060f"; x.fillRect(0,0,size,size);
+  x.save(); x.translate(size/2,size/2);
+  const R=size*.34;
+  x.strokeStyle="#f5c542"; x.lineWidth=size*.045;
+  x.beginPath(); x.arc(0,0,R*1.1,0,7); x.stroke();
+  for(let i=0;i<6;i++){ const a=i*Math.PI/3;
+    const g=x.createLinearGradient(0,0,R*Math.cos(a),R*Math.sin(a));
+    g.addColorStop(0,"#22d3ee"); g.addColorStop(1,"#e879f9");
+    x.strokeStyle=g; x.lineWidth=size*.05;
+    x.beginPath(); x.moveTo(0,0); x.lineTo(R*1.1*Math.cos(a),R*1.1*Math.sin(a)); x.stroke(); }
+  x.fillStyle="#f5c542"; x.beginPath(); x.arc(0,0,size*.07,0,7); x.fill();
+  x.restore();
+  return c.toDataURL("image/png");
+}
+(function pwa(){
+  const manifest={
+    name:"CHAKRA — AI Bias & Ethics Sandbox", short_name:"CHAKRA",
+    start_url:location.href.split("#")[0], display:"standalone",
+    background_color:"#08060f", theme_color:"#08060f",
+    description:"Interactive AI bias, fairness & privacy sandbox. Episode 12 of the AI Education Series by Krishnamurthy Kandregula.",
+    icons:[{src:makeIcon(192),sizes:"192x192",type:"image/png"},
+           {src:makeIcon(512),sizes:"512x512",type:"image/png",purpose:"any maskable"}]
+  };
+  const mURL=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:"application/json"}));
+  const link=document.createElement("link"); link.rel="manifest"; link.href=mURL;
+  document.head.appendChild(link);
+  const fav=document.createElement("link"); fav.rel="icon"; fav.href=makeIcon(64);
+  document.head.appendChild(fav);
+
+  if("serviceWorker" in navigator){
+    const swCode=`
+      const C="chakra-v1";
+      self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.add("${location.pathname}")).catch(()=>{}));self.skipWaiting();});
+      self.addEventListener("activate",e=>self.clients.claim());
+      self.addEventListener("fetch",e=>{
+        e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(res=>{
+          if(e.request.method==="GET"&&res.ok){const cl=res.clone();caches.open(C).then(c=>c.put(e.request,cl));}
+          return res;
+        }).catch(()=>hit)));
+      });`;
+    const swURL=URL.createObjectURL(new Blob([swCode],{type:"text/javascript"}));
+    navigator.serviceWorker.register(swURL).catch(()=>{ /* blob SW blocked on some hosts; app still works */ });
+  }
+  let deferred;
+  addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferred=e; $("installBtn").style.display="block"; });
+  $("installBtn").onclick=async()=>{ if(deferred){ deferred.prompt(); await deferred.userChoice; deferred=null; $("installBtn").style.display="none"; } };
+})();
+
+/* ---------- boot ---------- */
+syncKnobs(); runAll(); privRender(); ambient();
+</script>
+</body>
+</html>
