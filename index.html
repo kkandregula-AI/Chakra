@@ -101,6 +101,21 @@ section.chamber{margin-top:64px}
 .ch-why{color:var(--mist); max-width:72ch; margin-bottom:22px}
 .ch-why b{color:var(--ink); font-weight:500}
 
+/* ---------- world context strip ---------- */
+.worldstrip{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px;
+  margin:-6px 0 20px; padding:11px 16px; border-radius:var(--rs);
+  background:linear-gradient(100deg,rgba(232,121,249,.08),rgba(34,211,238,.06));
+  border:1px solid var(--line); font-size:.8rem; color:var(--mist);
+}
+.worldstrip .wname{font-family:'Cinzel',serif; font-weight:700; letter-spacing:.1em; color:var(--gold)}
+.worldstrip .wdom{color:var(--cyan); font-weight:500}
+.worldstrip .wvocab{font-family:'DM Mono',monospace; font-size:.68rem; letter-spacing:.08em; color:var(--faint); margin-left:auto}
+.worldstrip .wvocab b.pos{color:var(--ok)} .worldstrip .wvocab b.neg{color:var(--bad)}
+.worldstrip.universal{background:rgba(245,197,66,.05)}
+.worldstrip.universal .wname{color:var(--gold)}
+@media(max-width:560px){ .worldstrip .wvocab{margin-left:0; width:100%} }
+
 /* ---------- scenario cards ---------- */
 .scen-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
 .scen{
@@ -321,8 +336,9 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
   <section class="chamber reveal" id="ch2">
     <div class="ch-head">
       <span class="ch-num">II</span><h2>Poison the Well</h2>
-      <span class="ch-sub">Training Data · Real Math</span>
+      <span class="ch-sub" id="sub2">Training Data · Real Math</span>
     </div>
+    <div class="worldstrip" id="ws2"></div>
     <p class="ch-why">Three knobs, three classic corruption mechanisms. Turn them and watch the training data shift below — <b>the model never sees your knobs, only the data they poison.</b></p>
     <div class="lab">
       <div class="card">
@@ -369,8 +385,9 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
   <section class="chamber reveal" id="ch3">
     <div class="ch-head">
       <span class="ch-num">III</span><h2>Let the Machine Judge</h2>
-      <span class="ch-sub">Model · Trained Live</span>
+      <span class="ch-sub" id="sub3">Model · Trained Live</span>
     </div>
+    <div class="worldstrip" id="ws3"></div>
     <p class="ch-why">A logistic regression trains on your poisoned data in milliseconds, then scores everyone. Because this is a simulation, we can do something no real-world auditor can: <b>compare its verdicts to the ground truth</b> of who was actually qualified. Drag the decision threshold and watch justice move.</p>
     <div class="judge">
       <div class="card">
@@ -418,8 +435,9 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
   <section class="chamber reveal" id="ch4">
     <div class="ch-head">
       <span class="ch-num">IV</span><h2>Fight Back</h2>
-      <span class="ch-sub">Mitigation · Compared Live</span>
+      <span class="ch-sub" id="sub4">Mitigation · Compared Live</span>
     </div>
+    <div class="worldstrip" id="ws4"></div>
     <p class="ch-why">Five real strategies from the fairness literature, each retraining or re-thresholding on your exact poisoned data. Toggle them on and the arena table shows what each one buys — and what it costs. <b>There is no free lunch; there are only informed trades.</b></p>
     <div class="mit-grid" id="mitGrid" role="group" aria-label="Mitigation strategies">
       <button class="mit active" data-mit="none"><div class="mn">Do Nothing</div><div class="mw">Baseline</div><p>Ship the biased model as-is. The industry default, and the reason this app exists.</p></button>
@@ -443,6 +461,7 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
       <span class="ch-num">V</span><h2>The Impossible Wheel</h2>
       <span class="ch-sub">Theorem · Interactive</span>
     </div>
+    <div class="worldstrip universal"><span class="wname">Universal</span> <span>· this theorem holds in every world — it depends only on unequal base rates, not the scenario you picked.</span></div>
     <p class="ch-why">Kleinberg, Mullainathan & Raghavan proved it in 2016: when two groups have different base rates, <b>no classifier can equalise calibration, false-positive rates, and false-negative rates at once.</b> This was the heart of the COMPAS debate — both sides were right about their own metric. Slide the threshold and try to light all three lamps green. You can't. That's the theorem.</p>
     <div class="imposs">
       <div class="card">
@@ -474,6 +493,7 @@ footer{margin-top:80px; border-top:1px solid var(--line); padding:30px 0 8px; te
       <span class="ch-num">VI</span><h2>The Anonymity Illusion</h2>
       <span class="ch-sub">Privacy · k-anonymity</span>
     </div>
+    <div class="worldstrip universal"><span class="wname">Universal</span> <span>· re-identification risk applies to any released dataset, whichever world you chose.</span></div>
     <p class="ch-why">"We removed the names" is not privacy. With PIN code, age and gender alone, most people are unique in a dataset — Latanya Sweeney re-identified a US governor's medical file this way in 1997. Slide the generaliser and watch <b>k-anonymity</b> rise as detail (and utility) falls.</p>
     <div class="priv">
       <div class="card">
@@ -545,16 +565,33 @@ const sigmoid = z => 1/(1+Math.exp(-z));
 const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 const pct = x => (100*x).toFixed(1)+"%";
 const fmt = x => x.toFixed(3);
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+function syncScenLabels(){
+  const c = SCEN[scen];
+  const vocab = `<span class="wvocab">positive = <b class="pos">${c.posWord}</b> · negative = <b class="neg">${c.negWord}</b></span>`;
+  const strip = `<span class="wname">${c.short}</span><span class="wdom">${c.domain}</span>${vocab}`;
+  ["ws2","ws3","ws4"].forEach(id=>{ const el=$(id); if(el) el.innerHTML=strip; });
+  const s2=$("sub2"), s3=$("sub3"), s4=$("sub4");
+  if(s2) s2.textContent=c.short+" · Training Data";
+  if(s3) s3.textContent=c.short+" · Trained Live";
+  if(s4) s4.textContent=c.short+" · Mitigation";
+}
 
 /* ---------- scenarios (SIMULATED, pattern-honest) ---------- */
 const SCEN = {
-  nyaya:{ name:"NYĀYA · Recidivism", posWord:"released", negWord:"detained",
+  nyaya:{ name:"NYĀYA · Recidivism", short:"NYĀYA", domain:"Recidivism Risk · Justice",
+    posWord:"released", negWord:"detained",
+    mech:"Past over-policing recorded qualified Group B people as re-offenders.",
     baseA:.62, baseB:.55, defaults:{label:30, rep:35, proxy:60},
     story:"Positive = would not reoffend. Historical bias: past over-policing recorded qualified Group B people as re-offenders." },
-  artha:{ name:"ARTHA · Credit", posWord:"approved", negWord:"rejected",
+  artha:{ name:"ARTHA · Credit", short:"ARTHA", domain:"Credit Scoring · Finance",
+    posWord:"approved", negWord:"rejected",
+    mech:"Creditworthy Group B applicants were denied, so their repayment was never recorded.",
     baseA:.60, baseB:.58, defaults:{label:25, rep:25, proxy:75},
     story:"Positive = would repay. Historical bias: creditworthy Group B applicants were denied, so their repayment was never recorded." },
-  karma:{ name:"KARMA · Hiring", posWord:"shortlisted", negWord:"screened out",
+  karma:{ name:"KARMA · Hiring", short:"KARMA", domain:"Hiring AI · Work",
+    posWord:"shortlisted", negWord:"screened out",
+    mech:"Equally capable Group B candidates were rarely hired, so the archive calls them 'not a fit'.",
     baseA:.55, baseB:.55, defaults:{label:40, rep:20, proxy:85},
     story:"Positive = would perform well. Historical bias: equally capable Group B candidates were rarely hired, so the archive calls them 'not a fit'." }
 };
@@ -843,9 +880,10 @@ function renderJudge(){
   const model = S.models.none.model;
   const F = S.results.none;
   drawDist(model);
-  const cm=(c,el)=>{ $(el).innerHTML =
-    `<div class="tp">TP<b>${c.tp}</b></div><div class="fn">FN — qualified, denied<b>${c.fn}</b></div>
-     <div class="fp">FP<b>${c.fp}</b></div><div class="tn">TN<b>${c.tn}</b></div>`; };
+  const c=SCEN[scen];
+  const cm=(cf,el)=>{ $(el).innerHTML =
+    `<div class="tp">Rightly ${c.posWord}<b>${cf.tp}</b></div><div class="fn">Wrongly ${c.negWord}<b>${cf.fn}</b></div>
+     <div class="fp">Wrongly ${c.posWord}<b>${cf.fp}</b></div><div class="tn">Rightly ${c.negWord}<b>${cf.tn}</b></div>`; };
   cm(F.A,"cmA"); cm(F.B,"cmB");
   drawWheel($("judgeWheel"), F.A, F.B, 0, false);
   $("fairStats").innerHTML =
@@ -951,7 +989,8 @@ document.querySelectorAll(".scen").forEach(b=>b.onclick=()=>{
   b.classList.add("active"); scen=b.dataset.scen;
   const d=SCEN[scen].defaults;
   $("kLabel").value=d.label; $("kRep").value=d.rep; $("kProxy").value=d.proxy;
-  syncKnobs(); runAll();
+  syncKnobs(); syncScenLabels(); runAll();
+  $("ch2").scrollIntoView({behavior:"smooth", block:"start"});
 });
 function syncKnobs(){
   $("vLabel").textContent=$("kLabel").value+"%";
@@ -1049,7 +1088,7 @@ function makeIcon(size){
 })();
 
 /* ---------- boot ---------- */
-syncKnobs(); runAll(); privRender(); ambient();
+syncKnobs(); syncScenLabels(); runAll(); privRender(); ambient();
 </script>
 </body>
 </html>
